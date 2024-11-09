@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -10,12 +9,14 @@ function App() {
   const [endpoint, setEndpoint] = useState("/user/login");
   const [method, setMethod] = useState("POST");
   const [requestBody, setRequestBody] = useState(
-    '{\n  "userName": "testuser",\n  "password": "testpassword"\n}'
+    '{\n  "userEmail": "test@test.com",\n  "userPassword": "password"\n}'
   );
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showRequestBody, setShowRequestBody] = useState(true);
+  const [useAuth, setUseAuth] = useState(false);
+  const [authToken, setAuthToken] = useState("");
 
   const handleSubmit = async () => {
     try {
@@ -30,12 +31,20 @@ function App() {
         throw new Error("Invalid JSON in request body");
       }
 
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (useAuth && authToken) {
+        headers["Authorization"] = authToken.startsWith("Bearer ")
+          ? authToken
+          : `Bearer ${authToken}`;
+      }
+
       const config = {
         method: method,
         url: `${BASE_URL}${endpoint}`,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: headers,
       };
 
       if (method !== "GET" && parsedBody) {
@@ -64,7 +73,7 @@ function App() {
         style={{
           display: "flex",
           gap: "10px",
-          marginBottom: "20px",
+          marginBottom: "10px",
           alignItems: "flex-start",
         }}
       >
@@ -117,8 +126,46 @@ function App() {
         </button>
       </div>
 
+      {/* Authorization Header 컨트롤 */}
       <div
-        style={{ display: "flex", gap: "20px", height: "calc(100vh - 200px)" }}
+        style={{
+          marginBottom: "20px",
+          padding: "10px",
+          backgroundColor: "#f5f5f5",
+          borderRadius: "4px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <input
+              type="checkbox"
+              checked={useAuth}
+              onChange={(e) => setUseAuth(e.target.checked)}
+            />
+            Authorization Header 사용
+          </label>
+        </div>
+
+        {useAuth && (
+          <div style={{ marginTop: "10px" }}>
+            <input
+              type="text"
+              value={authToken}
+              onChange={(e) => setAuthToken(e.target.value)}
+              placeholder="Bearer eyJhbGciOiJIUzI1NiIs..."
+              style={{
+                padding: "8px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+                width: "100%",
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div
+        style={{ display: "flex", gap: "20px", height: "calc(100vh - 280px)" }}
       >
         <div style={{ flex: 1 }}>
           <h3>요청</h3>
