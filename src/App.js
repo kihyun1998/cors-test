@@ -45,6 +45,7 @@ function App() {
         method: method,
         url: `${BASE_URL}${endpoint}`,
         headers: headers,
+        withCredentials: true,
       };
 
       if (method !== "GET" && parsedBody) {
